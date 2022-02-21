@@ -37,8 +37,8 @@ object Main extends App with CirceHttpSupport {
                 userContext = carEnv,
                 variables = req.variables,
                 operationName = req.operationName,
-                middleware = middleware
-                //deferredResolver = deferredResolver
+                middleware = middleware,
+                deferredResolver = SchemaDefinitions.Resolver
               ).map(OK -> _)
                 .recover {
                   case error: QueryAnalysisError => BadRequest -> error.resolveError

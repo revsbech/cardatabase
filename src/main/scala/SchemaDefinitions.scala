@@ -1,6 +1,11 @@
 import sangria.schema._
+import sangria.execution.deferred.HasId
+import sangria.execution.deferred.Fetcher
+import sangria.execution.deferred.DeferredResolver
 import sangria.macros.derive._
 import Model._
+
+
 object SchemaDefinitions {
 
   val PictureTypeOld = ObjectType(
@@ -48,6 +53,8 @@ object SchemaDefinitions {
   val ManufactorType =
     deriveObjectType[Unit, Manufactor](
       Interfaces(IntIdentifiableType))
+  implicit val linkHasId = HasId[Manufactor, Int](_.id)
+
 
   val QueryType = ObjectType("Query", fields[CarEnvironment, Unit](
     Field("product", OptionType(ProductType),
@@ -62,15 +69,22 @@ object SchemaDefinitions {
     Field("manufactor", OptionType(ManufactorType),
       description = Some("Return a Manufactorer with specific id."),
       arguments = IntId :: Nil,
-      resolve = c => c.ctx.dao.getManufactor(c.arg[Int]("id"))
+      resolve = c => carFetcher.deferOpt(c.arg[Int]("id"))
     ),
     Field("manufactors",
       ListType(ManufactorType),
       arguments = IntIdList :: Nil,
       description = Some("Returns a list of all available manufactors"),
-      resolve = c => c.ctx.dao.getManufactors(c.arg[Seq[Int]]("ids"))
+      resolve = c => carFetcher.deferSeq(c.arg("ids")) // c.ctx.dao.getManufactors(c.arg[Seq[Int]]("ids"))
     ))
   )
   val schema = Schema(QueryType)
+
+  // Using a cache and de-dpulication Fetcher
+  val carFetcher = Fetcher(
+    (ctx: CarEnvironment, ids: Seq[Int]) => ctx.dao.getManufactors(ids)
+  )
+
+  val Resolver = DeferredResolver.fetchers(carFetcher)
 
 }
