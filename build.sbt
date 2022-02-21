@@ -13,7 +13,7 @@ scalaVersion := "2.13.3"
 
 // It's possible to define many kinds of settings, such as:
 
-name := "hello-world"
+name := "Car database"
 organization := "ch.epfl.scala"
 version := "1.0"
 
@@ -55,6 +55,11 @@ libraryDependencies ++= Seq(
   "io.circe" %% "circe-core" % circeVersion,
   "io.circe" %% "circe-parser" % circeVersion,
   "io.circe" %% "circe-optics" % circeVersion,
+
+  "com.typesafe.slick" %% "slick" % "3.3.3",
+  "com.typesafe.slick" %% "slick-hikaricp" % "3.3.3",
+  // "org.slf4j" % "slf4j-nop" % "1.7.35",
+  "com.h2database" % "h2" % "2.1.210",
 
   "com.typesafe.akka" %% "akka-http-testkit"        % akkaHttpVersion % Test,
   "com.typesafe.akka" %% "akka-actor-testkit-typed" % akkaVersion     % Test,

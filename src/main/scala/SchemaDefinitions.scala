@@ -1,6 +1,6 @@
 import sangria.schema._
 import sangria.macros.derive._
-
+import Model._
 object SchemaDefinitions {
 
   val PictureTypeOld = ObjectType(
@@ -15,7 +15,7 @@ object SchemaDefinitions {
         resolve = _.value.url)))
 
   /**
-   * This will automatically have widht and height, and we have overridden the url field
+   * This will automatically have width and height, and we have overridden the url field
    */
   implicit val PictureType =
     deriveObjectType[Unit, Picture](
@@ -29,24 +29,48 @@ object SchemaDefinitions {
     fields[Unit, Identifiable](
       Field("id", StringType, resolve = _.value.id)))
 
+  val IntIdentifiableType = InterfaceType(
+    "IntegerIdentifiable",
+    "Entity that can be identified by an integer",
+
+    fields[Unit, IntIdentifiable](
+      Field("id", IntType, resolve = _.value.id)))
+
   val ProductType =
     deriveObjectType[Unit, Product](
       Interfaces(IdentifiableType),
       IncludeMethods("picture"))
 
   val Id = Argument("id", StringType)
+  val IntId = Argument("id", IntType)
+  val IntIdList = Argument("ids", ListInputType(IntType))
 
-  // @todo Create a context object instead f using ProducRepot
-  val QueryType = ObjectType("Query", fields[ProductRepo, Unit](
+  val ManufactorType =
+    deriveObjectType[Unit, Manufactor](
+      Interfaces(IntIdentifiableType))
+
+  val QueryType = ObjectType("Query", fields[CarEnvironment, Unit](
     Field("product", OptionType(ProductType),
       description = Some("Returns a product with specific `id`."),
       arguments = Id :: Nil,
-      resolve = c => c.ctx.product(c arg Id)),
+      resolve = c => c.ctx.productRepo.product(c arg Id)),
 
     Field("products", ListType(ProductType),
       description = Some("Returns a list of all available products."),
-      resolve = _.ctx.products)))
+      resolve = _.ctx.productRepo.products),
 
+    Field("manufactor", OptionType(ManufactorType),
+      description = Some("Return a Manufactorer with specific id."),
+      arguments = IntId :: Nil,
+      resolve = c => c.ctx.dao.getManufactor(c.arg[Int]("id"))
+    ),
+    Field("manufactors",
+      ListType(ManufactorType),
+      arguments = IntIdList :: Nil,
+      description = Some("Returns a list of all available manufactors"),
+      resolve = c => c.ctx.dao.getManufactors(c.arg[Seq[Int]]("ids"))
+    ))
+  )
   val schema = Schema(QueryType)
 
 }
