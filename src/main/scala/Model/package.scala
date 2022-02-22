@@ -1,3 +1,4 @@
+import akka.http.scaladsl.model.DateTime
 
 
 package object Model {
@@ -16,6 +17,6 @@ package object Model {
   }
 
   case class Car(id: Int, model: String, year: Int, manufactor: Manufactor) extends IntIdentifiable
-  case class Manufactor(id: Int, name: String) extends IntIdentifiable
+  case class Manufactor(id: Int, name: String, createdAt: DateTime) extends IntIdentifiable
 
 }

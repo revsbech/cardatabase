@@ -1,12 +1,31 @@
 import sangria.schema._
+import akka.http.scaladsl.model.DateTime
 import sangria.execution.deferred.HasId
 import sangria.execution.deferred.Fetcher
 import sangria.execution.deferred.DeferredResolver
 import sangria.macros.derive._
 import Model._
+import sangria.validation.Violation
 
+//imports:
+import sangria.ast.StringValue
 
 object SchemaDefinitions {
+  case object DateTimeCoerceViolation extends Violation {
+    override def errorMessage: String = "Error during parsing DateTime"
+  }
+  implicit val GraphQLDateTime = ScalarType[DateTime](//1
+    "DateTime",//2
+    coerceOutput = (dt: DateTime, _) => dt.toString, //3
+    coerceInput = { //4
+      case StringValue(dt, _, _, _, _ ) => DateTime.fromIsoDateTimeString(dt).toRight(DateTimeCoerceViolation)
+      case _ => Left(DateTimeCoerceViolation)
+    },
+    coerceUserInput = { //5
+      case s: String => DateTime.fromIsoDateTimeString(s).toRight(DateTimeCoerceViolation)
+      case _ => Left(DateTimeCoerceViolation)
+    }
+  )
 
   val PictureTypeOld = ObjectType(
     "Picture",
@@ -52,8 +71,10 @@ object SchemaDefinitions {
 
   val ManufactorType =
     deriveObjectType[Unit, Manufactor](
-      Interfaces(IntIdentifiableType))
-  implicit val linkHasId = HasId[Manufactor, Int](_.id)
+      ReplaceField("createdAt", Field("createdAt", GraphQLDateTime, resolve = _.value.createdAt))
+      , Interfaces(IntIdentifiableType)
+    )
+  implicit val manufactorHasId = HasId[Manufactor, Int](_.id)
 
 
   val QueryType = ObjectType("Query", fields[CarEnvironment, Unit](
@@ -80,7 +101,7 @@ object SchemaDefinitions {
   )
   val schema = Schema(QueryType)
 
-  // Using a cache and de-dpulication Fetcher
+  // Using a cache and de-duplication Fetcher
   val carFetcher = Fetcher(
     (ctx: CarEnvironment, ids: Seq[Int]) => ctx.dao.getManufactors(ids)
   )
