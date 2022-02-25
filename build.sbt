@@ -39,8 +39,9 @@ fork := true
 libraryDependencies += "org.scala-lang.modules" %% "scala-parser-combinators" % "1.1.2"
 libraryDependencies ++= Seq(
 
-  "org.sangria-graphql" %% "sangria" % "2.1.3",
-  "org.sangria-graphql" %% "sangria-slowlog" % "2.0.2",
+  "org.sangria-graphql" %% "sangria" % "2.1.5",
+  "org.sangria-graphql" %% "sangria-spray-json" % "1.0.2",
+  "org.sangria-graphql" %% "sangria-slowlog" % "2.0.4",
   "org.sangria-graphql" %% "sangria-circe" % "1.3.2",
 
   "org.sangria-graphql" %% "sangria-akka-http-core" % sangriaAkkaHttpVersion,

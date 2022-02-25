@@ -1,22 +1,17 @@
 import akka.http.scaladsl.model.DateTime
-
+import sangria.execution.deferred.HasId
 
 package object Model {
-  trait Identifiable {
-    def id: String
-  }
   trait IntIdentifiable {
     def id: Int
   }
 
-  case class Picture(width: Int, height: Int, url: Option[String])
-
-  case class Product(id: String, name: String, description: String) extends Identifiable {
-    def picture(size: Int): Picture =
-      Picture(width = size, height = size, url = Some(s"//cdn.com/$size/$id.jpg"))
+  object IntIdentifiable {
+    implicit def hasId[T <: IntIdentifiable]: HasId[T, Int] = HasId(_.id)
   }
 
-  case class Car(id: Int, model: String, year: Int, manufactor: Manufactor) extends IntIdentifiable
+  case class Car(id: Int, model: String, year: Int, manufactorId: Int) extends IntIdentifiable
   case class Manufactor(id: Int, name: String, createdAt: DateTime) extends IntIdentifiable
+  case class CarCreateData(model: String, year: Int, manufactorId: Int)
 
 }
