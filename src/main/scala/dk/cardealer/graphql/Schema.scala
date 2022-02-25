@@ -1,11 +1,11 @@
 package dk.cardealer.graphql
 
 import akka.http.scaladsl.model.DateTime
-import dk.cardealer.CarEnvironment
-import dk.cardealer.Model.{IntIdentifiable}
+import dk.cardealer.{CarEnvironment, graphql}
+import dk.cardealer.Model.IntIdentifiable
 import sangria.ast.StringValue
-import sangria.execution.deferred.{DeferredResolver, Fetcher, Relation, RelationIds}
-import sangria.schema.{Argument, Field, InputObjectType, IntType, InterfaceType, ListInputType, ListType, ObjectType, OptionType, ScalarType, Schema, StringType, fields, interfaces}
+import sangria.execution.deferred.DeferredResolver
+import sangria.schema.{Argument, Field, IntType, InterfaceType, ListInputType, ObjectType, ScalarType, Schema, fields}
 import sangria.validation.Violation
 
 object CarSchema {
@@ -37,9 +37,8 @@ object CarSchema {
     ObjectType(
       "Query",
       fields[CarEnvironment, Unit](
-        Cars.getCar,
-        Manufactors.getManufactor,
-        Manufactors.listManufactorsByIds
+        Cars.queryField,
+        Manufactors.queryField
       )
     ),
     Some(
