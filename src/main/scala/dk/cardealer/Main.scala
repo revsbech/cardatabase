@@ -1,3 +1,5 @@
+package dk.cardealer
+
 import akka.actor.ActorSystem
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.Http
@@ -21,8 +23,8 @@ object Main extends App with CirceHttpSupport {
 
   scala.sys.addShutdownHook(() -> shutdown())
 
-  private val dao = DBSchema.createDatabase
-  val carEnv = CarEnvironment(dao)
+  // Initialize DataAccessObject and CarDealerEnvironment
+  val carEnv = CarEnvironment(DBSchema.createDatabase)
 
   val route: Route =
     optionalHeaderValueByName("X-Apollo-Tracing") { tracing =>
@@ -32,13 +34,13 @@ object Main extends App with CirceHttpSupport {
             case Success(req) =>
               val middleware = if (tracing.isDefined) SlowLog.apolloTracing :: Nil else Nil
               val graphQLResponse = Executor.execute(
-                schema = SchemaDefinitions.schema,
+                schema = dk.cardealer.graphql.CarSchema.schema,
                 queryAst = req.query,
                 userContext = carEnv,
                 variables = req.variables,
                 operationName = req.operationName,
                 middleware = middleware,
-                deferredResolver = SchemaDefinitions.Resolver
+                deferredResolver = dk.cardealer.graphql.CarSchema.Resolver
               ).map(OK -> _)
                 .recover {
                   case error: QueryAnalysisError => BadRequest -> error.resolveError

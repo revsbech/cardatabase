@@ -1,9 +1,11 @@
+package dk.cardealer
+
 import akka.http.scaladsl.model.DateTime
-import Model.{Car, Manufactor}
+import dk.cardealer.Model.{Car, Manufactor}
 import slick.jdbc.H2Profile.MappedColumnType
 import slick.jdbc.H2Profile.api._
-import java.sql.Timestamp
 import scala.concurrent.duration._
+import java.sql.Timestamp
 import scala.concurrent.Await
 import scala.language.postfixOps
 

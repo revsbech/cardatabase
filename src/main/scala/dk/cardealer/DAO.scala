@@ -1,4 +1,6 @@
-import Model.{Car, CarCreateData, Manufactor}
+package dk.cardealer
+
+import dk.cardealer.Model.{Car, CarCreateData, Manufactor}
 import slick.jdbc.H2Profile.api._
 
 import scala.concurrent.Future
